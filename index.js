@@ -33,12 +33,31 @@ async function run() {
 
     const productCollection = client.db('bingoToy').collection('productCollection');
 
-    app.get('/products', async (req, res) => { 
+    app.get('/products', async (req, res) => {
       const result = await productCollection.find().toArray();
       res.send(result);
     })
 
-    app.get('/products/:subcategory', async (req, res) => { 
+    const indexKeys = { name: 1, category: 1 };
+    const indexOptions = { name: "nameCategory" }
+
+    const result = await productCollection.createIndex(indexKeys, indexOptions);
+
+    app.get("/itemSearch/:name", async (req, res) => {
+      const searchItems = req.params.name;
+
+      const result = await productCollection.find({
+        $or: [
+          { name: { $regex: searchItems, $options: "i" } },
+          { category: { $regex: searchItems, $options: "i" } }
+        ]
+      }).toArray();
+
+      res.send(result);
+    });
+
+
+    app.get('/products/:subcategory', async (req, res) => {
       if (req.params.subcategory == "Science" || req.params.subcategory == "Language" || req.params.subcategory == "Engineering" || req.params.subcategory == "Math") {
         const result = await productCollection.find({ sub_category: req.params.subcategory }).toArray();
         return res.send(result)
@@ -47,7 +66,7 @@ async function run() {
       res.send(result);
     })
 
-    app.post("/addToy", async (req, res) => { 
+    app.post("/addToy", async (req, res) => {
       const body = req.body;
       if (!body) {
         return
@@ -56,7 +75,11 @@ async function run() {
       res.send(result);
     })
 
-
+    app.get('/myToy/:email', async (req, res) => {
+      console.log(req.params.email);
+      const result = await productCollection.find({ seller_email: req.params.email }).toArray();
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
@@ -72,10 +95,10 @@ run().catch(console.dir);
 
 
 
-app.get('/', (req, res) => { 
-    res.send('Bingo is running Kids are happy');
+app.get('/', (req, res) => {
+  res.send('Bingo is running Kids are happy');
 })
 
 app.listen(port, () => {
-    console.log(`bingo toy  server is running on port ${port}`);
+  console.log(`bingo toy  server is running on port ${port}`);
 })
