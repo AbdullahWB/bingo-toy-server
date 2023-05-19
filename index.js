@@ -11,7 +11,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.luk9jtm.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -78,6 +78,19 @@ async function run() {
     app.get('/myToy/:email', async (req, res) => {
       console.log(req.params.email);
       const result = await productCollection.find({ seller_email: req.params.email }).toArray();
+      res.send(result);
+    })
+
+    app.put("/updateToy/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          name: body.name,
+        }
+      };
+      const result = await productCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
 
