@@ -41,9 +41,16 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/totalProducts', async (req, res) => { 
+    app.get('/products/details/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.get('/totalProducts', async (req, res) => {
       const result = await productCollection.estimatedDocumentCount();
-      res.send({totalProducts :result});
+      res.send({ totalProducts: result });
     })
 
     const indexKeys = { name: 1, category: 1 };
@@ -111,7 +118,7 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/products/:id', async (req, res) => { 
+    app.delete('/products/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await productCollection.deleteOne(query)
