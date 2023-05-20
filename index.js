@@ -34,8 +34,16 @@ async function run() {
     const productCollection = client.db('bingoToy').collection('productCollection');
 
     app.get('/products', async (req, res) => {
-      const result = await productCollection.find().toArray();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+      const skip = page * limit
+      const result = await productCollection.find().skip(skip).limit(limit).toArray();
       res.send(result);
+    })
+
+    app.get('/totalProducts', async (req, res) => { 
+      const result = await productCollection.estimatedDocumentCount();
+      res.send({totalProducts :result});
     })
 
     const indexKeys = { name: 1, category: 1 };
@@ -100,6 +108,13 @@ async function run() {
         }
       };
       const result = await productCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    app.delete('/products/:id', async (req, res) => { 
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.deleteOne(query)
       res.send(result);
     })
 
