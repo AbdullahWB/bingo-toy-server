@@ -92,9 +92,14 @@ async function run() {
 
     app.get('/myToy/:email', async (req, res) => {
       console.log(req.params.email);
-      const result = await productCollection.find({ seller_email: req.params.email }).toArray();
+      const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+      const result = await productCollection
+        .find({ seller_email: req.params.email })
+        .sort({ price: sortOrder })
+        .toArray();
       res.send(result);
-    })
+    });
+
 
     app.put("/updateToy/:id", async (req, res) => {
       const id = req.params.id;
