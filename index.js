@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //  client.connect();
 
 
 
@@ -53,14 +53,13 @@ async function run() {
       res.send({ totalProducts: result });
     })
 
-    const indexKeys = { name: 1, category: 1 };
-    const indexOptions = { name: "nameCategory" }
-
-    const result = await productCollection.createIndex(indexKeys, indexOptions);
 
     app.get("/itemSearch/:name", async (req, res) => {
       const searchItems = req.params.name;
+      const indexKeys = { name: 1, category: 1 };
+      const indexOptions = { name: "nameCategory" }
 
+      const result2 = await productCollection.createIndex(indexKeys, indexOptions);
       const result = await productCollection.find({
         $or: [
           { name: { $regex: searchItems, $options: "i" } },
